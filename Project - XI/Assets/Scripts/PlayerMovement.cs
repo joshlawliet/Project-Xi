@@ -13,18 +13,13 @@ public class PlayerMovement : TacticsMove
     // Update is called once per frame
     void Update()
     {
-        //Rayo para saber hacia dónde está viendo el personaje
-        #region
         Debug.DrawRay(transform.position, transform.forward);
-        #endregion
 
-        //Validación del turno de la unidad
-        if (!turn)
+        if(!turn)
         {
             return;
         }
 
-        //Validación para el movimiento de la unidad
         if (!moving)
         {
             FindSelectableTiles();
@@ -36,8 +31,6 @@ public class PlayerMovement : TacticsMove
         }    
     }
 
-
-    //Función para verificar la baldosa seleccionada
     void CheckMouse()
     {
         if(Input.GetMouseButtonUp(0))
@@ -47,7 +40,6 @@ public class PlayerMovement : TacticsMove
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                //Sólo se permite seleccionar baldosas para el movimiento
                 if(hit.collider.tag == "Tile")
                 {
                     Tile t = hit.collider.GetComponent<Tile>();

@@ -13,26 +13,11 @@ public class TacticsMove : MonoBehaviour
     Tile currentTile;
 
     public bool moving = false;
-
-    //Variables para las estadísticas de los personajes
-    #region
-    public int health = 200;
     public int move = 4;
     public float jumpHeight = 2;
     public float moveSpeed = 2;
     public float jumpVelocity = 4.5f;
-    public float resilience = .1f;
-    #endregion
 
-    //Variables para el Control de Masas
-    #region 
-    public bool zombified = false;
-    public bool poisoned = false;
-    public int poisonCD = 0;
-    #endregion
-
-    //Variables para el desplazamiento de los personajes
-    #region
     Vector3 velocity = new Vector3();
     Vector3 heading = new Vector3();
 
@@ -44,7 +29,6 @@ public class TacticsMove : MonoBehaviour
     Vector3 jumpTarget;
 
     public Tile actualTargetTile;
-    #endregion
 
     protected void Init()
     {
@@ -52,18 +36,16 @@ public class TacticsMove : MonoBehaviour
 
         tiles = GameObject.FindGameObjectsWithTag("Tile");
 
-        //Las unidades se añaden 
         TurnManager.AddUnit(this);
     }
 
-    //Función para detectar el tile sobre el cual están paradas las unidades
     public void GetCurrentTile()
     {
         currentTile = GetTargetTile(gameObject);
         currentTile.current = true;
     }
 
-    //Obtener el tile objetivo
+    //we want to be able to pick a tile somewhere up there
     public Tile GetTargetTile(GameObject target)
     {
         RaycastHit hit;
@@ -82,7 +64,7 @@ public class TacticsMove : MonoBehaviour
         foreach (GameObject tile in tiles)
         {
             Tile t = tile.GetComponent<Tile>();
-            t.FindNeighbors(jumpHeight, target, t.poisoned);
+            t.FindNeighbors(jumpHeight, target);
             
         }
     }
@@ -189,7 +171,7 @@ public class TacticsMove : MonoBehaviour
 
         foreach (Tile tile in selectableTiles)
         {
-            tile.Reset(tile.poisoned);
+            tile.Reset();
         }
 
         selectableTiles.Clear();
@@ -344,9 +326,6 @@ public class TacticsMove : MonoBehaviour
         return endTile;
     }
 
-
-    //Función para el encontrar el camino a seguir por parte de los NPCs
-    //Falta Documentar
     protected void FindPath(Tile target)
     {
         ComputeAdjacencyLists(jumpHeight, target);
@@ -408,8 +387,7 @@ public class TacticsMove : MonoBehaviour
             }
         }
 
-        //TO DO: Qué hacer si no hay camino posible hacia la unidad o si ya están ocupados los espacios?
-        //Sugerencia: Ejecutar el foreach anterior reduciendo en 1 el EndTile
+        //What do you do if there is no path to the target tile
         Debug.Log("Path not Found");
     }
 

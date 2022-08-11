@@ -4,21 +4,15 @@ using UnityEngine;
 
 public class TacticsCamera : MonoBehaviour
 {
-
-    //Rotar la cámara a la izquiera 90°
-    #region
-    public void RotateLeft()
-    {
+   public void RotateLeft()
+   {
        transform.Rotate(Vector3.up, 90, Space.Self);    
-    }
-    #endregion
+   }
 
-
-    //Rotar la cámara a la derecha 90°
-    #region
-    public void RotateRight()
-    {
+   public void RotateRight()
+   {
        transform.Rotate(Vector3.up, -90, Space.Self);
-    }
-    #endregion
+   }
 }
+
+//https://www.youtube.com/watch?v=cK2wzBCh9cg

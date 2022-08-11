@@ -4,32 +4,22 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    //Variables de estado de los Tiles
-    #region
     public bool walkable = true;
     public bool current = false;
     public bool target = false;
     public bool selectable = false;
-    public bool poisoned = false;
-    public float poisonTest;
-    #endregion
 
-    //Lista de los Tiles cercanos (necesario para los algoritmos de búsqueda)
     public List<Tile> adjacencyList = new List<Tile>();
 
-    //Variables del algoritmo BFS(Breadth first Search)
-    #region
+    //Needed BFS(Breadth first Search)
     public bool visited = false;
     public Tile parent = null;
     public int distance = 0;
-    #endregion
 
-    //Variables para el algoritmo A*
-    #region
+    //For A*
     public float f = 0;
     public float g = 0;
     public float h = 0;
-    #endregion
 
     // Start is called before the first frame update
     void Start()
@@ -56,23 +46,18 @@ public class Tile : MonoBehaviour
         {
             GetComponent<Renderer>().material.color = Color.gray;
         }
-        else if (poisoned)
-        {
-            GetComponent<Renderer>().material.color = Color.yellow;
-        }
         else
         {
             GetComponent<Renderer>().material.color = Color.white;
         }
     }
 
-    public void Reset(bool poison)
+    public void Reset()
     {
         walkable = true;
         current = false;
         target = false;
         selectable = false;
-        poisoned = poison;
 
         adjacencyList.Clear();
 
@@ -83,9 +68,9 @@ public class Tile : MonoBehaviour
         f = g = h = 0;
     }
 
-    public void FindNeighbors(float jumpHeight, Tile target, bool poison)
+    public void FindNeighbors(float jumpHeight, Tile target)
     {
-        Reset(poison);
+        Reset();
 
         CheckTile(Vector3.forward, jumpHeight, target);
         CheckTile(-Vector3.forward, jumpHeight, target);

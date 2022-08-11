@@ -7,58 +7,66 @@ public class TurnManager : MonoBehaviour
     static Dictionary<string, List<TacticsMove>> units = new Dictionary<string, List<TacticsMove>>();
     static Queue<string> turnKey = new Queue<string>();
     static Queue<TacticsMove> turnTeam = new Queue<TacticsMove>();
-    static bool enemyTurn = false;
+    public static bool enemyTurn = false;
 
+  private static ZWaves zwaves = new ZWaves();
+  
+    #region Variables for Menu Tactics
+    [SerializeField] GameObject[] menuTactics;
+  #endregion
 
-    void Update()
+  #region Instance of GameObject array (Menu Tactics objects)
+  private void Awake()
+  {
+    menuTactics = new GameObject[2];
+  }
+  #endregion
+
+  #region Setting Tactics Menu Objects in array
+  // Start is called before the first frame update
+  void Start()
+  {
+    menuTactics[0] = GameObject.Find("ButtonTactics");
+    menuTactics[1] = GameObject.Find("MenuTactics");
+  }
+  #endregion
+
+  // Update is called once per frame
+  void Update()
     {
-        //Revisar si ya terminó el turno de un equipo
-        #region
-        if (turnTeam.Count == 0)
+        if(turnTeam.Count == 0)
         {
             InitTeamQueue();
         }
-        #endregion
-    }
+    #region Menu Tactics On and Off, according to Active Turn.
+    if (enemyTurn == true)
+        {
+          menuTactics[0].SetActive(false);
+          menuTactics[1].SetActive(false);
+        }
+        else
+        {
+          menuTactics[0].SetActive(true);
+        }
+    #endregion
+  }
 
-    static void InitTeamQueue()
+  static void InitTeamQueue()
     {
         enemyTurn = !enemyTurn;
         Debug.Log(enemyTurn);
         List<TacticsMove> teamList = units[turnKey.Peek()];
 
-        if (!enemyTurn)
+        foreach(TacticsMove unit in teamList)
         {
-            Zombify(teamList);
-        }
-
-        foreach (TacticsMove unit in teamList)
-        {
-            if (!unit.zombified)
-            {
-                if (unit.poisoned)
-                {
-                    if (unit.poisonCD < 2)
-                    {
-                        unit.health -= 10;
-                        unit.poisonCD += 1;
-                        turnTeam.Enqueue(unit);
-                        CheckTileState(unit);
-                    }
-                    else
-                    {
-                        unit.poisoned = false;
-                        unit.poisonCD = 0;
-                    }
-                }
-                else
-                {
-                    turnTeam.Enqueue(unit);
-                    CheckTileState(unit);
-                }
-            }
+            turnTeam.Enqueue(unit);
         }
         StartTurn();
+
+        if (enemyTurn)
+        {
+            zwaves.unleashWaves();
+        }
     }
 
     public static void StartTurn()
@@ -107,62 +115,19 @@ public class TurnManager : MonoBehaviour
 
         list.Add(unit);
     }
-
-
-    //Función que lanza las ondas que zombifican a las unidades aliadas
-    //Debería moverse al script de ZWaves
-    private static void Zombify(List<TacticsMove> teamList)
+  #region Menu Tactics Behavior On and Off
+  public void SetOnandOff()
+  {
+    switch (menuTactics[1].activeSelf)
     {
-        float randomFloat;
-        foreach (TacticsMove unit in teamList)
-        {
-            randomFloat = Random.value;
-            Debug.Log(unit.name + randomFloat.ToString());
-            //Si la resiliencia es menor a un número aleatorio, la unidad 
-            if (unit.resilience <= randomFloat)
-            {
-                unit.zombified = true;
-                //unit.GetComponent<NPCMovement>().health = unit.GetComponent<PlayerMovement>().health;
-                //Destroy(unit.GetComponent<PlayerMovement>());
-
-                //Para zombificar la unidad, se deshabilita el script de movimiento de unidad y habilita el movimiento por NPC
-                //TO DO: Quitar el script completamente e insertar el otro
-                unit.GetComponent<PlayerMovement>().enabled = false;
-                unit.GetComponent<NPCMovement>().enabled = true;
-                unit.tag = "NPC";
-                unit.GetComponent<Renderer>().material.color = Color.grey;
-            }
-        }
-
-        //Algoritmo de prueba del estado de envenenamiento en tiles
-        //Se debe quitar una vez que ya funcione el envenamiento por otros modos
-        #region
-        GameObject[] tiles = GameObject.FindGameObjectsWithTag("Tile");
-        foreach (GameObject tile in tiles)
-        {
-            Tile t = tile.GetComponent<Tile>();
-            randomFloat = Random.value;
-            if (t.poisonTest < randomFloat)
-            {
-                t.poisoned = true;
-            }
-        }
-        #endregion
+      case true:
+        menuTactics[1].SetActive(false);
+        break;
+      case false:
+        menuTactics[1].SetActive(true);
+        break;
     }
 
-
-    //Algoritmo que revisa si el tile tiene algún efecto de estado (quemadura, veneno, etc)
-    public static void CheckTileState(TacticsMove character)
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(character.transform.position, Vector3.down, out hit, 1))
-        {
-            //Si el Tile está envenenado y hay una unidad sobre éste, la unidad se envenenará
-            //To Do: Darle un contador a los tiles para quitarles el efecto tras ciertos turnos
-            if (hit.collider.GetComponent<Tile>().poisoned)
-            {
-                character.poisoned = true;
-            }
-        }
-    }
+  }
+  #endregion
 }
